@@ -1,28 +1,26 @@
 require('dotenv').config()
 var express = require('express');
 var app = express();
-var jwt = require('express-jwt');
+var mongoose = require('mongoose');
+var bodyParser = require('body-parser');
+var passport = require('passport');
+var morgan = require('morgan');
+//var path = require('path');
+var LocalStrategy = require('passport-local');
 var Router = require('./routes/router');
+var User = require('./models/User');
 
+//======================================
+// ENV VARIABLES
+//======================================
 var port = process.env.PORT || CONFIG.port;
-var AUTH_SECRET = process.env.AUTH_SECRET;
-var AUTH_CLIENT = process.env.AUTH_CLIENT;
 var MLAB_USER = process.env.MLAB_USER;
 var MLAB_PW = process.env.MLAB_PW;
+var PASSPORT_SECRET = process.env.PASSPORT_SECRET;
 
-var jwtCheck = jwt({
-	secret: new Buffer(AUTH_SECRET, 'base64'),
-	aud: AUTH_CLIENT
-});
-
-var mongoose = require('mongoose');
-
-var path = require('path');
-
-var bodyParser = require('body-parser');
-app.use(bodyParser.json()); // support json encoded bodies
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
-
+//======================================
+// DB CONNECTION
+//======================================
 mongoose.connect('mongodb://' + MLAB_USER + ':' + MLAB_PW + '@ds019970.mlab.com:19970/mongotest', function(err) {
 	if (err) {
 		console.log('connection error', err);
@@ -31,13 +29,26 @@ mongoose.connect('mongodb://' + MLAB_USER + ':' + MLAB_PW + '@ds019970.mlab.com:
 	}
 });
 
+app.use(morgan('common'));
 app.use(express.static('public'));
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+
+//======================================
+// PASSPORT SETUP
+//======================================
+app.use(require('express-session')({
+	secret: PASSPORT_SECRET,
+	resave: false,
+	saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use('/', Router);
-
-app.use('/new-recipe', jwtCheck);
-app.use('/shopping-lists', jwtCheck);
-app.use('/shopping-list/:recipeID', jwtCheck);
 
 app.listen(port, function() {	
 	console.log('server started');
