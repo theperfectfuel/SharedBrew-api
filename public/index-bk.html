@@ -1,10 +1,14 @@
 <!doctype html>
-    <html lang="en">
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="" ng-app="beerApp"> <!--<![endif]-->
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 		<title></title>
 		<meta name="description" content="">
+		<!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
 		<link rel="apple-touch-icon" href="apple-touch-icon.png">
 
 		<link rel="stylesheet" href="css/bootstrap.min.css">
@@ -19,6 +23,17 @@
 		<link rel="stylesheet" href="css/main.css">
 
 		<script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
+		<!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular-animate.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-messages.js"></script>
+		<script src="https://code.angularjs.org/1.4.5/angular-route.min.js"></script> -->
+
+		<!-- Auth0 Lock script and AngularJS module -->
+		<!-- <script src="//cdn.auth0.com/js/lock-9.0.min.js"></script> -->
+		<!-- angular-jwt  -->
+		<!-- <script type="text/javascript" src="//cdn.rawgit.com/auth0/angular-jwt/master/dist/angular-jwt.js"></script> -->
+		<!-- <script src="//cdn.auth0.com/w2/auth0-angular-4.js"> </script> -->
+		<!-- <script src="js/main.js"></script> -->
 
 		<!-- Setting the right viewport -->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -28,7 +43,7 @@
 		<!--[if lt IE 8]>
 			<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 		<![endif]-->
-	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="loginCtrl">
 		<div class="container">
 			<div class="navbar-header pull-left">
 				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -40,11 +55,11 @@
 			</div>
 
 			<form class="navbar-header navbar-form pull-right" role="form">
-				<button type="submit" class="btn btn-success">
+				<button ng-show="!auth.isAuthenticated" type="submit" class="btn btn-success" ng-click="auth.signin()">
 					Sign in
 				</button>
-				<button type="submit" class="btn btn-success">
-					Sign out
+				<button ng-show="auth.isAuthenticated" type="submit" class="btn btn-success" ng-click="logout()">
+					Sign out {{auth.profile.nickname}}
 				</button>
 			</form>
 
@@ -53,8 +68,8 @@
 				<ul class="nav navbar-nav">
 					<ii><a class="navbar-brand" href="#/home">{{title}}</a></ii>
 					<li><a class="navbar-brand btn" href="#/list-recipes">View Recipes</a></li>
-					<li><a class="navbar-brand btn" href="#/new-recipe">Create Recipe</a></li>
-					<li><a class="navbar-brand btn" href="#/shopping-lists">Shopping Lists</a></li>
+					<li><a ng-show="auth.isAuthenticated" class="navbar-brand btn" href="#/new-recipe">Create Recipe</a></li>
+					<li><a ng-show="auth.isAuthenticated" class="navbar-brand btn" href="#/shopping-lists">Shopping Lists</a></li>
 				</ul>
 
 			</div><!--/.navbar-collapse -->
@@ -62,58 +77,7 @@
 		</div>
 	</nav>
 
-  <!-- <div ng-view>REGISTER</div> -->
-
-  <!-- Main jumbotron for a primary marketing message or call to action -->
-  <div class="jumbotron" ng-init="scrollToTop()">
-    <div class="container" ng-controller="loginCtrl">
-      <h1>
-        {{brandMsg}}<br />
-        {{maintitle}}
-     </h1>
-      <h3>Make recipes, shopping lists and some new friends.</h3>
-      <p ng-show="auth.isAuthenticated">
-        <a class="btn btn-primary btn-lg" href="#/new-recipe" role="button">
-          Create a recipe &raquo;
-        </a>
-      </p>
-      <p ng-show="!auth.isAuthenticated">
-        <a class="btn btn-primary btn-lg" ng-click="auth.signin()" role="button">
-          Login to Create a recipe &raquo;
-        </a>
-      </p>
-    </div>
-  </div>
-
-  <div class="container">
-    <!-- Example row of columns -->
-    <!-- <div class="row"> -->
-      <!-- <div class="col-md-6">
-        <h2>Latest Recipe</h2>
-        <p>Some kind of IPA. </p>
-        <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
-      </div> -->
-      <!-- <div class="col-md-4">
-        <h2>Latest Member</h2>
-        <p>Someone brewing an IPA. </p>
-        <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
-     </div> -->
-      <!-- <div class="col-md-6">
-        <h2>Recommended Beer</h2>
-        <p>Our favorite non-IPA of the moment.</p>
-        <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
-      </div> -->
-    <!-- </div> -->
-
-    <div class="row">
-      <div class="col-md-6 col-md-offset-3 top-padding">
-        <h3>Welcome!</h3>
-        <p>SharedBrew is a place to discover new beer recipes, make quick and easy shopping lists for new batches and make some connections with other home brewers.</p>
-        <p>Start by signing up. Then creating a new recipe or just search through the existing library of brew recipes already here. When you find a recipe you want to try, create a new shopping list from the link on the recipe.</p>
-      </div>
-    </div>
-
-    <hr>
+	<div ng-view></div>
 
 	  <footer>
 		<p>&copy; SharedBrew.com 2016</p>
