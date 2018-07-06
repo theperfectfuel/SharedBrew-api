@@ -17,6 +17,22 @@ function isLoggedIn(req, res, next) {
 //======================================
 // AUTH ROUTES
 //======================================
+
+//======================================
+// GOOGLE STRATEGY
+//======================================
+//======================================
+// register
+//======================================
+Router.get('/auth/google', passport.authenticate('google', {
+	scope: ['profile', 'email']
+}));
+
+Router.get('/auth/google/callback', passport.authenticate('google'));
+
+//======================================
+// LOCAL STRATEGY
+//======================================
 //======================================
 // register
 //======================================
@@ -54,6 +70,7 @@ Router.post('/login', passport.authenticate('local', {
 	successRedirect: '/list-recipes',
 	failureRedirect: '/login'
 }) ,(req, res) => {
+	console.log('hello');
 });
 
 Router.get('/logout', (req, res) => {
@@ -62,24 +79,29 @@ Router.get('/logout', (req, res) => {
 	res.redirect('/');
 })
 
+Router.get('/check-user', (req, res) => {
+	console.log('user: ', req.user);
+	res.json(req.user);
+})
+
 //======================================
 // API RESOURCE ROUTES
 //======================================
-Router.get('/list-recipes', isLoggedIn, function(req, res) {
-	console.log('is authenticated', req.isAuthenticated());
+Router.get('/list-recipes', function(req, res) {
 	// use mongoose to get all recipes in the database
 	Recipe.find(function(err, recipes) {
 		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
-		if (err)
+		if (err) {
 		    return res.send(err);
-
+		}
+		console.log('is authenticated', req.isAuthenticated());
 		return res.json(recipes); // return all recipes in JSON format
 	});
 });
 
 Router.get('/list-recipes/:recipeID', function(req, res) {
 	// use mongoose to get one recipe in the database
-	Recipe.findOne({_id: req.query.recipeID}, function(err, recipe) {
+	Recipe.findById(req.params.recipeID, function(err, recipe) {
 		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
 		if (err) {
 		    return res.send(err);
@@ -90,14 +112,25 @@ Router.get('/list-recipes/:recipeID', function(req, res) {
 });
 
 Router.get('/shopping-lists', function(req, res) {
-	var user_id = req.user.sub;
+	//var user_id = req.user.sub;
 	// use mongoose to get user's shopping lists in the database
-	ShoppingList.where('brewer', user_id).find(function(err, shoppingLists) {
+
+	ShoppingList.where('brewer', '5b3c21555db7cf270ac37e47').find(function(err, shoppingLists) {
 		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
 		if (err) {
 		    return res.send(err);
 		} else {
-			return res.json(shoppingLists); // return all recipes in JSON format
+			var brewer;
+			User.findById('5b3c21555db7cf270ac37e47', (err, user) => {
+				if (err) {
+					return res.send(err);
+				}
+				brewer = user.username;
+				shoppingLists.push({brewer: brewer});
+				console.log('is authenticated', req.isAuthenticated());
+				console.log('shopping lists: ', shoppingLists);
+				return res.json(shoppingLists); // return all recipes in JSON format
+			});
 		}
 	});
 });

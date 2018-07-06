@@ -5,10 +5,8 @@ var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var passport = require('passport');
 var morgan = require('morgan');
-//var path = require('path');
-var LocalStrategy = require('passport-local');
 var Router = require('./routes/router');
-var User = require('./models/User');
+require('./auth/passport');
 
 //======================================
 // ENV VARIABLES
@@ -35,7 +33,7 @@ app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 //======================================
-// PASSPORT SETUP
+// APP / PASSPORT SETUP
 //======================================
 app.use(require('express-session')({
 	secret: PASSPORT_SECRET,
@@ -44,9 +42,16 @@ app.use(require('express-session')({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+
+//======================================
+// ALLOW CORS
+//======================================
+app.use(function(req,res,next){
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	next();
+  })
+
 
 app.use('/', Router);
 
