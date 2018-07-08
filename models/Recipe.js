@@ -21,7 +21,6 @@ var otherSchema = mongoose.Schema({
 });
 
 var recipeSchema = mongoose.Schema({ 
-
 	beer_name: String,
 	beer_style: String,
 	beer_abv: Number,
@@ -34,8 +33,8 @@ var recipeSchema = mongoose.Schema({
 	brew_difficulty: String,
 	batch_size: Number,
 	brew_instructions: String,
-	brewer: String
-
+	_brewer: { type: Schema.Types.ObjectId, ref: 'User' },
+	createdDate: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Recipe', recipeSchema);

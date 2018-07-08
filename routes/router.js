@@ -2,17 +2,11 @@ var express = require('express');
 var Router = express.Router();
 var path = require('path');
 var passport = require('passport');
+var checkLoggedIn = require('../middleware/checkLoggedIn');
 
 var Recipe = require('../models/Recipe');
 var ShoppingList = require('../models/ShoppingList');
 var User = require('../models/User');
-
-function isLoggedIn(req, res, next) {
-	if(req.isAuthenticated()) {
-		return next();
-	}
-	res.redirect('/login');
-}
 
 //======================================
 // AUTH ROUTES
@@ -28,7 +22,14 @@ Router.get('/auth/google', passport.authenticate('google', {
 	scope: ['profile', 'email']
 }));
 
-Router.get('/auth/google/callback', passport.authenticate('google'));
+Router.get(
+	'/auth/google/callback', 
+	passport.authenticate('google'),
+	(req, res) => {
+		res.redirect('/list-recipes');
+	}
+);
+
 
 //======================================
 // LOCAL STRATEGY
@@ -36,26 +37,26 @@ Router.get('/auth/google/callback', passport.authenticate('google'));
 //======================================
 // register
 //======================================
-Router.get('/register', (req, res) => {
-	res.sendFile(path.resolve('public/views/register.html'));
-});
+// Router.get('/register', (req, res) => {
+// 	res.sendFile(path.resolve('public/views/register.html'));
+// });
 
-Router.post('/register', (req, res) => {
-	console.log(req.body.userName, req.body.email, req.body.password);
-	User.register(new User(
-		{username: req.body.username, email: req.body.email}), 
-		req.body.password, 
-		(err, user) => {
-			if(err) {
-				console.log(err);
-				return res.render('register');
-			}
-			passport.authenticate('local')(req, res, () => {
-				console.log(user);
-				res.redirect('/list-recipes');
-			})
-		});
-})
+// Router.post('/register', (req, res) => {
+// 	console.log(req.body.userName, req.body.email, req.body.password);
+// 	User.register(new User(
+// 		{username: req.body.username, email: req.body.email}), 
+// 		req.body.password, 
+// 		(err, user) => {
+// 			if(err) {
+// 				console.log(err);
+// 				return res.render('register');
+// 			}
+// 			passport.authenticate('local')(req, res, () => {
+// 				console.log(user);
+// 				res.redirect('/list-recipes');
+// 			})
+// 		});
+// })
 
 
 //======================================
@@ -135,9 +136,16 @@ Router.get('/shopping-lists', function(req, res) {
 	});
 });
 
-Router.post('/new-recipe', function(req, res) {
-	var recipe = new Recipe(req.body);
-	recipe.brewer = req.user.sub;
+Router.post('/new-recipe', checkLoggedIn, function(req, res) {
+	const {beer_name, beer_style, beer_abv, grains_list, hops_list, yeast_list, other_list,
+		orig_grav, final_grav, brew_difficulty, batch_size, brew_instructions} = req.body;
+
+	const recipe = new Recipe({
+		beer_name, beer_style, beer_abv, grains_list, hops_list, yeast_list, other_list,
+		orig_grav, final_grav, brew_difficulty, batch_size, brew_instructions
+	});
+	
+	recipe._brewer = req.user.id;
 	recipe.save(function(err, recipe) {
 		if (err) {
 			res.status(500).send('An error occurred');

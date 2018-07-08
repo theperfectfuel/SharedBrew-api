@@ -5,6 +5,7 @@ var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var passport = require('passport');
 var morgan = require('morgan');
+var cookieSession = require('cookie-session');
 var Router = require('./routes/router');
 require('./auth/passport');
 
@@ -15,6 +16,7 @@ var port = process.env.PORT || CONFIG.port;
 var MLAB_USER = process.env.MLAB_USER;
 var MLAB_PW = process.env.MLAB_PW;
 var PASSPORT_SECRET = process.env.PASSPORT_SECRET;
+var COOKIE_KEY = process.env.COOKIE_KEY;
 
 //======================================
 // DB CONNECTION
@@ -35,11 +37,15 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 //======================================
 // APP / PASSPORT SETUP
 //======================================
-app.use(require('express-session')({
-	secret: PASSPORT_SECRET,
-	resave: false,
-	saveUninitialized: false
-}));
+// app.use(require('express-session')({
+// 	secret: PASSPORT_SECRET,
+// 	resave: false,
+// 	saveUninitialized: false
+// }));
+app.use(cookieSession({
+	maxAge: 7 * 24 * 60 * 60 * 1000,
+	keys: [COOKIE_KEY]
+}))
 app.use(passport.initialize());
 app.use(passport.session());
 
