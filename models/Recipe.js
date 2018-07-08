@@ -33,7 +33,7 @@ var recipeSchema = mongoose.Schema({
 	brew_difficulty: String,
 	batch_size: Number,
 	brew_instructions: String,
-	_brewer: { type: Schema.Types.ObjectId, ref: 'User' },
+	_brewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 	createdDate: { type: Date, default: Date.now }
 });
 

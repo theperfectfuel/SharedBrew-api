@@ -27,7 +27,7 @@ var shoppingListSchema = mongoose.Schema({
 	yeast_list: [yeastSchema],
 	other_list: [otherSchema],
 	batch_size: Number,
-	_brewer: { type: Schema.Types.ObjectId, ref: 'User' },
+	_brewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 	createdDate: { type: Date, default: Date.now }
 });
 
