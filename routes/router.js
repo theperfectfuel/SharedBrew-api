@@ -2,11 +2,26 @@ var express = require('express');
 var Router = express.Router();
 var path = require('path');
 var passport = require('passport');
+var bodyParser = require('body-parser');
+var cors = require('cors');
 var checkLoggedIn = require('../middleware/checkLoggedIn');
 
 var Recipe = require('../models/Recipe');
 var ShoppingList = require('../models/ShoppingList');
 var User = require('../models/User');
+
+//var CLIENT_ORIGIN = process.env.CLIENT_ORIGIN;
+
+// Router.use(function(req,res,next){
+// 	res.header('Access-Control-Allow-Origin', '*');
+// 	res.header('Access-Control-Allow-Credentials', true);
+// 	res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+// 	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, X-Auth-Token');
+// 	next();
+//   })
+
+// Router.use(cors({origin: "*"}));
+// Router.options('*', cors());
 
 //======================================
 // AUTH ROUTES
@@ -137,12 +152,29 @@ Router.get('/shopping-lists', function(req, res) {
 });
 
 Router.post('/new-recipe', checkLoggedIn, function(req, res) {
-	const {beer_name, beer_style, beer_abv, grains_list, hops_list, yeast_list, other_list,
-		orig_grav, final_grav, brew_difficulty, batch_size, brew_instructions} = req.body;
+	console.log('you made it here', req.user.id);
+	// const {beer_name, beer_style, beer_abv, grains_list, hops_list, yeast_list, other_list,
+	// 	orig_grav, final_grav, brew_difficulty, batch_size, brew_instructions} = req.body;
+
+	// const recipe = new Recipe({
+	// 	beer_name, beer_style, beer_abv, grains_list, hops_list, yeast_list, other_list,
+	// 	orig_grav, final_grav, brew_difficulty, batch_size, brew_instructions
+	// });
+	console.log(req.body);
 
 	const recipe = new Recipe({
-		beer_name, beer_style, beer_abv, grains_list, hops_list, yeast_list, other_list,
-		orig_grav, final_grav, brew_difficulty, batch_size, brew_instructions
+		beer_name: req.body.beer_name, 
+		beer_style: req.body.beer_style, 
+		beer_abv: req.body.beer_abv, 
+		grains_list: req.body.grains_list, 
+		hops_list: req.body.hops_list, 
+		yeast_list: req.body.yeast_list, 
+		other_list: req.body.other_list,
+		orig_grav: req.body.orig_grav, 
+		final_grav: req.body.final_grav, 
+		brew_difficulty: req.body.brew_difficulty, 
+		batch_size: req.body.batch_size, 
+		brew_instructions: req.body.brew_instructions
 	});
 	
 	recipe._brewer = req.user.id;
@@ -152,7 +184,8 @@ Router.post('/new-recipe', checkLoggedIn, function(req, res) {
 			return console.log('error saving ', err);
 		} else {
 			console.log('Recipe saved successfully');
-			res.status(202).send(recipe);
+			//res.status(202).send(recipe);
+			res.redirect('http://localhost:3000/list-recipes');
 		}
 	});
 });

@@ -6,9 +6,19 @@ var bodyParser = require('body-parser');
 var passport = require('passport');
 var morgan = require('morgan');
 var cookieSession = require('cookie-session');
+var cors = require('cors');
 var Router = require('./routes/router');
+app.use(cors({credentials: true, origin: true}));
+app.options('*', cors());
 require('./auth/passport');
 
+// app.use(function(req,res,next){
+// 	res.header('Access-Control-Allow-Origin', '*');
+// 	res.header('Access-Control-Allow-Credentials', true);
+// 	res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+// 	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, X-Auth-Token');
+// 	next();
+//   })
 //======================================
 // ENV VARIABLES
 //======================================
@@ -17,6 +27,7 @@ var MLAB_USER = process.env.MLAB_USER;
 var MLAB_PW = process.env.MLAB_PW;
 var PASSPORT_SECRET = process.env.PASSPORT_SECRET;
 var COOKIE_KEY = process.env.COOKIE_KEY;
+var CLIENT_ORIGIN = process.env.CLIENT_ORIGIN;
 
 //======================================
 // DB CONNECTION
@@ -48,16 +59,6 @@ app.use(cookieSession({
 }))
 app.use(passport.initialize());
 app.use(passport.session());
-
-//======================================
-// ALLOW CORS
-//======================================
-app.use(function(req,res,next){
-	res.header("Access-Control-Allow-Origin", "*");
-	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-	next();
-  })
-
 
 app.use('/', Router);
 
