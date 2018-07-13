@@ -6,19 +6,21 @@ var bodyParser = require('body-parser');
 var passport = require('passport');
 var morgan = require('morgan');
 var cookieSession = require('cookie-session');
-var cors = require('cors');
+//var cors = require('cors');
 var Router = require('./routes/router');
-app.use(cors({credentials: true, origin: true}));
-app.options('*', cors());
-require('./auth/passport');
 
-// app.use(function(req,res,next){
-// 	res.header('Access-Control-Allow-Origin', '*');
-// 	res.header('Access-Control-Allow-Credentials', true);
-// 	res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-// 	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, X-Auth-Token');
-// 	next();
-//   })
+app.use(function(req,res,next){
+	res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+	res.header('Access-Control-Allow-Credentials', true);
+	res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, X-Auth-Token');
+	if (req.method === "OPTIONS") {
+		return res.send(204);
+	}
+	next();
+  })
+
+
 //======================================
 // ENV VARIABLES
 //======================================
@@ -28,6 +30,9 @@ var MLAB_PW = process.env.MLAB_PW;
 var PASSPORT_SECRET = process.env.PASSPORT_SECRET;
 var COOKIE_KEY = process.env.COOKIE_KEY;
 var CLIENT_ORIGIN = process.env.CLIENT_ORIGIN;
+
+require('./auth/passport');
+
 
 //======================================
 // DB CONNECTION
@@ -40,6 +45,7 @@ mongoose.connect('mongodb://' + MLAB_USER + ':' + MLAB_PW + '@ds019970.mlab.com:
 	}
 });
 
+//app.use(cors());
 app.use(morgan('common'));
 app.use(express.static('public'));
 app.use(bodyParser.json()); // support json encoded bodies
