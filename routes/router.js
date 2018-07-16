@@ -90,6 +90,10 @@ Router.get('/check-user', (req, res) => {
 //======================================
 // API RESOURCE ROUTES
 //======================================
+//======================================
+// RECIPES
+//======================================
+
 Router.get('/list-recipes', (req, res) => {
 	// use mongoose to get all recipes in the database
 	Recipe.find((err, recipes) => {
@@ -114,31 +118,6 @@ Router.get('/list-recipes/:recipeID', (req, res) => {
 	});
 });
 
-Router.get('/shopping-lists', (req, res) => {
-	//var user_id = req.user.sub;
-	// use mongoose to get user's shopping lists in the database
-
-	ShoppingList.where('brewer', '5b3c21555db7cf270ac37e47')
-		.find((err, shoppingLists) => {
-		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
-		if (err) {
-		    return res.send(err);
-		} else {
-			var brewer;
-			User.findById('5b3c21555db7cf270ac37e47', (err, user) => {
-				if (err) {
-					return res.send(err);
-				}
-				brewer = user.username;
-				shoppingLists.push({brewer: brewer});
-				console.log('is authenticated', req.isAuthenticated());
-				console.log('shopping lists: ', shoppingLists);
-				return res.json(shoppingLists); // return all recipes in JSON format
-			});
-		}
-	});
-});
-
 Router.post('/new-recipe', checkLoggedIn, (req, res) => {
 
 	if (req.user.id) {
@@ -151,6 +130,8 @@ Router.post('/new-recipe', checkLoggedIn, (req, res) => {
 		beer_name: req.body.beer_name, 
 		beer_style: req.body.beer_style, 
 		beer_abv: req.body.beer_abv, 
+		beer_ibu: req.body.beer_ibu, 
+		beer_srm: req.body.beer_srm,
 		grains_list: req.body.grains_list, 
 		hops_list: req.body.hops_list, 
 		yeast_list: req.body.yeast_list, 
@@ -170,21 +151,61 @@ Router.post('/new-recipe', checkLoggedIn, (req, res) => {
 		} else {
 			console.log('Recipe saved successfully');
 			//res.status(202).send(recipe);
-			res.send('worked');
+			res.send('recipe saved successfully');
 		}
 	});
 });
 
-Router.post('/shopping-list/:recipeID', (req, res) => {
+//======================================
+// SHOPPING LISTS
+//======================================
+
+Router.get('/shopping-lists', checkLoggedIn, (req, res) => {
+	//var user_id = req.user.sub;
+	// use mongoose to get user's shopping lists in the database
+	console.log('req.user.id is : ', req.user.id)
+	ShoppingList.find({_brewer: req.user.id}, (err, shoppingLists) => {
+		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
+		if (err) {
+		    return res.send(err);
+		} else {
+			var brewer;
+			User.findById(req.user.id, (err, user) => {
+				if (err) {
+					return res.send(err);
+				}
+				brewer = user.username;
+				shoppingLists.push({brewer: brewer});
+				console.log('is authenticated', req.isAuthenticated());
+				console.log('shopping lists: ', shoppingLists);
+				return res.json(shoppingLists); // return all shopping lists in JSON format
+			});
+		}
+	});
+});
+
+Router.get('/shopping-list/:shoppingListID', checkLoggedIn, (req, res) => {
+	// use mongoose to get one shopping list in the database
+	ShoppingList.findById(req.params.shoppingListID, (err, shoppingList) => {
+		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
+		if (err) {
+		    return res.send(err);
+		} else {
+			return res.json(shoppingList); // return one shopping list in JSON format
+		}
+	});
+});
+
+Router.post('/shopping-list/:recipeID', checkLoggedIn, (req, res) => {
 	var shoppingList = new ShoppingList(req.body);
-	shoppingList.brewer = req.user.sub;
+	shoppingList._brewer = req.user.id;
 	shoppingList.save((err, shoppingList) => {
 		if (err) {
 			res.status(500).send('An error occurred');
 			return console.log('error saving ', err);
 		} else {
 			console.log('List saved successfully');
-			res.status(202).send(shoppingList);
+			res.status(202).send('list saved successfully');
 		}
 	});
 });

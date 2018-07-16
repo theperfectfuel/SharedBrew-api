@@ -23,13 +23,30 @@ var otherSchema = mongoose.Schema({
 var recipeSchema = mongoose.Schema({ 
 	beer_name: String,
 	beer_style: String,
-	beer_abv: Number,
+	beer_abv: {
+		type: Number,
+		default: 0,
+	},
+	beer_srm: {
+		type: Number,
+		default: 0
+	},
+	beer_ibu: {
+		type: Number,
+		default: 0
+	},
+	orig_grav: {
+		type: Number,
+		default: 0
+	},
+	final_grav: {
+		type: Number,
+		default: 0
+	},
 	grains_list: [grainsSchema],
 	hops_list: [hopsSchema],
 	yeast_list: [yeastSchema],
 	other_list: [otherSchema],
-	orig_grav: Number,
-	final_grav: Number,
 	brew_difficulty: String,
 	batch_size: Number,
 	brew_instructions: String,
