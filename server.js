@@ -9,18 +9,6 @@ var cookieSession = require('cookie-session');
 //var cors = require('cors');
 var Router = require('./routes/router');
 
-app.use(function(req,res,next){
-	res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, X-Auth-Token');
-	if (req.method === "OPTIONS") {
-		return res.send(204);
-	}
-	next();
-  })
-
-
 //======================================
 // ENV VARIABLES
 //======================================
@@ -30,6 +18,17 @@ var MLAB_PW = process.env.MLAB_PW;
 var PASSPORT_SECRET = process.env.PASSPORT_SECRET;
 var COOKIE_KEY = process.env.COOKIE_KEY;
 var CLIENT_ORIGIN = process.env.CLIENT_ORIGIN;
+
+app.use(function(req,res,next){
+	res.header('Access-Control-Allow-Origin', CLIENT_ORIGIN);
+	res.header('Access-Control-Allow-Credentials', true);
+	res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, X-Auth-Token');
+	if (req.method === "OPTIONS") {
+		return res.send(204);
+	}
+	next();
+  })
 
 require('./auth/passport');
 

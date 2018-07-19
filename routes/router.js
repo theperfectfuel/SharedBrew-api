@@ -164,7 +164,7 @@ Router.get('/shopping-lists', checkLoggedIn, (req, res) => {
 	//var user_id = req.user.sub;
 	// use mongoose to get user's shopping lists in the database
 	console.log('req.user.id is : ', req.user.id)
-	ShoppingList.find({_brewer: req.user.id}, (err, shoppingLists) => {
+	ShoppingList.find({_brewer: req.user.id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
 		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
 		if (err) {
 		    return res.send(err);
