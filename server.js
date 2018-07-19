@@ -46,7 +46,7 @@ mongoose.connect('mongodb://' + MLAB_USER + ':' + MLAB_PW + '@ds019970.mlab.com:
 
 //app.use(cors());
 app.use(morgan('common'));
-app.use(express.static('public'));
+//app.use(express.static('public'));
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
