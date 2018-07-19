@@ -6,7 +6,7 @@ var bodyParser = require('body-parser');
 var passport = require('passport');
 var morgan = require('morgan');
 var cookieSession = require('cookie-session');
-var cors = require('cors');
+//var cors = require('cors');
 var Router = require('./routes/router');
 
 //======================================
@@ -44,7 +44,7 @@ mongoose.connect('mongodb://' + MLAB_USER + ':' + MLAB_PW + '@ds019970.mlab.com:
 	}
 });
 
-app.use(cors());
+//app.use(cors());
 app.use(morgan('common'));
 //app.use(express.static('public'));
 app.use(bodyParser.json()); // support json encoded bodies
