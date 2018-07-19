@@ -160,7 +160,7 @@ Router.post('/new-recipe', checkLoggedIn, (req, res) => {
 // SHOPPING LISTS
 //======================================
 
-Router.get('/shopping-lists', checkLoggedIn, (req, res) => {
+Router.get('/shopping-lists', (req, res) => {
 	//var user_id = req.user.sub;
 	// use mongoose to get user's shopping lists in the database
 	console.log('req.user.id is : ', req.user.id)
