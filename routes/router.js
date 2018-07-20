@@ -28,7 +28,7 @@ Router.get(
 	'/auth/google/callback', 
 	passport.authenticate('google'),
 	(req, res) => {
-		res.redirect('/list-recipes');
+		res.redirect('https://agile-retreat-41726.herokuapp.com/list-recipes');
 	}
 );
 
