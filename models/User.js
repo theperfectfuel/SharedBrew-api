@@ -1,16 +1,21 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
-//const passportLocalMongoose = require('passport-local-mongoose');
+mongoose.Promise = global.Promise;
 
 const UserSchema = new mongoose.Schema({
     username: {
-        type: String
+        type: String,
+        required: true,
+        unique: true
     },
     email: {
-        type: String
+        type: String,
+        unique: true
     },
     password: {
-        type: String
+        type: String,
+        required: true
     },
     googleId: {
         type: String
@@ -21,6 +26,20 @@ const UserSchema = new mongoose.Schema({
     }
 });
 
-//UserSchema.plugin(passportLocalMongoose);
+UserSchema.methods.serialize = function() {
+    return {
+      username: this.username || '',
+      firstName: this.firstName || '',
+      lastName: this.lastName || ''
+    };
+  };
+  
+  UserSchema.methods.validatePassword = function(password) {
+    return bcrypt.compare(password, this.password);
+  };
+  
+  UserSchema.statics.hashPassword = function(password) {
+    return bcrypt.hash(password, 10);
+  };
 
 module.exports = mongoose.model('User', UserSchema);

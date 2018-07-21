@@ -1,91 +1,13 @@
 var express = require('express');
 var Router = express.Router();
 var path = require('path');
-var passport = require('passport');
 var checkLoggedIn = require('../middleware/checkLoggedIn');
-
 var Recipe = require('../models/Recipe');
 var ShoppingList = require('../models/ShoppingList');
 var User = require('../models/User');
 
-//var CLIENT_ORIGIN = process.env.CLIENT_ORIGIN;
-
-//======================================
-// AUTH ROUTES
-//======================================
-
-//======================================
-// GOOGLE STRATEGY
-//======================================
-//======================================
-// register
-//======================================
-Router.get('/auth/google', passport.authenticate('google', {
-	scope: ['profile', 'email']
-}));
-
-Router.get(
-	'/auth/google/callback', 
-	passport.authenticate('google'),
-	(req, res) => {
-		res.redirect('https://agile-retreat-41726.herokuapp.com/list-recipes');
-	}
-);
-
-
-//======================================
-// LOCAL STRATEGY
-//======================================
-//======================================
-// register
-//======================================
-// Router.get('/register', (req, res) => {
-// 	res.sendFile(path.resolve('public/views/register.html'));
-// });
-
-// Router.post('/register', (req, res) => {
-// 	console.log(req.body.userName, req.body.email, req.body.password);
-// 	User.register(new User(
-// 		{username: req.body.username, email: req.body.email}), 
-// 		req.body.password, 
-// 		(err, user) => {
-// 			if(err) {
-// 				console.log(err);
-// 				return res.render('register');
-// 			}
-// 			passport.authenticate('local')(req, res, () => {
-// 				console.log(user);
-// 				res.redirect('/list-recipes');
-// 			})
-// 		});
-// })
-
-
-//======================================
-// login / logout
-//======================================
-
-Router.get('/login', (req, res) => {
-	res.sendFile(path.resolve('public/views/login.html'));
-});
-
-Router.post('/login', passport.authenticate('local', {
-	successRedirect: '/list-recipes',
-	failureRedirect: '/login'
-}) ,(req, res) => {
-	console.log('hello');
-});
-
-Router.get('/logout', (req, res) => {
-	console.log('is authenticated', req.isAuthenticated());
-	req.logout();
-	res.redirect('/');
-})
-
-Router.get('/check-user', (req, res) => {
-	console.log('user: ', req.user);
-	res.json(req.user);
-})
+var passport = require('passport');
+const jwtAuth = passport.authenticate('jwt', {session: false});
 
 //======================================
 // API RESOURCE ROUTES
@@ -101,7 +23,7 @@ Router.get('/list-recipes', (req, res) => {
 		if (err) {
 		    return res.send(err);
 		}
-		console.log('is authenticated', req.isAuthenticated());
+		console.log('is authenticated', req.user);
 		return res.json(recipes); // return all recipes in JSON format
 	});
 });
@@ -113,6 +35,7 @@ Router.get('/list-recipes/:recipeID', (req, res) => {
 		if (err) {
 		    return res.send(err);
 		} else {
+			console.log('sending this over: ', recipe);
 			return res.json(recipe); // return one recipe in JSON format
 		}
 	});
@@ -160,11 +83,13 @@ Router.post('/new-recipe', checkLoggedIn, (req, res) => {
 // SHOPPING LISTS
 //======================================
 
-Router.get('/shopping-lists', (req, res) => {
-	//var user_id = req.user.sub;
+Router.get('/shopping-lists', jwtAuth, (req, res) => {
+
+	const _user = User.find({username: req.user.username}, (err, _user) => {
+		console.log('getting shopping lists for user: ', _user);
+	});
 	// use mongoose to get user's shopping lists in the database
-	console.log('req.user.id is : ', req.user.id)
-	ShoppingList.find({_brewer: req.user.id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
+	ShoppingList.find({_brewer: _user.id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
 		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
 		if (err) {
 		    return res.json(
@@ -175,21 +100,15 @@ Router.get('/shopping-lists', (req, res) => {
 			);
 		} else {
 			var brewer;
-			User.findById(req.user.id, (err, user) => {
-				if (err) {
-					return res.send(err);
-				}
-				brewer = user.username;
-				shoppingLists.push({brewer: brewer});
-				console.log('is authenticated', req.isAuthenticated());
-				console.log('shopping lists: ', shoppingLists);
-				return res.json(shoppingLists); // return all shopping lists in JSON format
-			});
+			brewer = _user.username;
+			shoppingLists.push({brewer: brewer});
+			console.log('shopping lists: ', shoppingLists);
+			return res.json(shoppingLists); // return all shopping lists in JSON format
 		}
 	});
 });
 
-Router.get('/shopping-list/:shoppingListID', checkLoggedIn, (req, res) => {
+Router.get('/shopping-list/:shoppingListID', jwtAuth, checkLoggedIn, (req, res) => {
 	// use mongoose to get one shopping list in the database
 	ShoppingList.findById(req.params.shoppingListID, (err, shoppingList) => {
 		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
@@ -201,9 +120,14 @@ Router.get('/shopping-list/:shoppingListID', checkLoggedIn, (req, res) => {
 	});
 });
 
-Router.post('/shopping-list/:recipeID', checkLoggedIn, (req, res) => {
+Router.post('/shopping-list/:recipeID', jwtAuth, (req, res) => {
 	var shoppingList = new ShoppingList(req.body);
-	shoppingList._brewer = req.user.id;
+
+	const _user = User.find({username: req.user.username}, (err, _user) => {
+		console.log('user is now: ', _user);
+	});
+
+	shoppingList._brewer = _user.id;
 	shoppingList.save((err, shoppingList) => {
 		if (err) {
 			res.status(500).send('An error occurred');
@@ -212,14 +136,17 @@ Router.post('/shopping-list/:recipeID', checkLoggedIn, (req, res) => {
 			console.log('List saved successfully');
 			res.status(202).send('list saved successfully');
 		}
-	});
+	})
+	.catch(err => {
+		console.log('error saving shopping list: ', err);
+	})
 });
 
 //======================================
 // CATCH ALL ROUTE
 //======================================
 Router.get('*', (req, res) => {
-	res.sendFile(path.resolve('public/views/home.html'));
+	res.send('could not find route');
 });
 
 module.exports = Router;
