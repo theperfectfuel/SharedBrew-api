@@ -41,11 +41,11 @@ Router.get('/list-recipes/:recipeID', (req, res) => {
 	});
 });
 
-Router.post('/new-recipe', checkLoggedIn, (req, res) => {
+Router.post('/new-recipe', jwtAuth, (req, res) => {
 
-	if (req.user.id) {
-		console.log('you made it here ', req.user.id);
-	}
+	const _user = User.find({username: req.user.username}, (err, _user) => {
+		console.log('saving recipe for user: ', _user);
+	});
 
 	console.log('req.body from post route ', req.body);
 
@@ -66,7 +66,7 @@ Router.post('/new-recipe', checkLoggedIn, (req, res) => {
 		brew_instructions: req.body.brew_instructions
 	});
 	
-	recipe._brewer = req.user.id;
+	recipe._brewer = _user.id;
 	recipe.save((err, recipe) => {
 		if (err) {
 			res.status(500).send('An error occurred');
