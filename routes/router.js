@@ -92,8 +92,8 @@ Router.get('/shopping-lists', jwtAuth, (req, res) => {
 
 	});
 	// use mongoose to get user's shopping lists in the database
-	ShoppingList.find({_brewer: _user._id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
-		console.log('inside ShoppingList.find _user.id is: ', _user._id);
+	ShoppingList.find({_brewer: _user[0]._id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
+		console.log('inside ShoppingList.find _user.id is: ', _user[0]._id);
 		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
 		if (err) {
 		    return res.json(
@@ -103,9 +103,9 @@ Router.get('/shopping-lists', jwtAuth, (req, res) => {
 				}
 			);
 		} else {
-			console.log('inside ShoppingList.find else block _user.username is: ', _user.username);
+			console.log('inside ShoppingList.find else block _user.username is: ', _user[0].username);
 			var brewer;
-			brewer = _user.username;
+			brewer = _user[0].username;
 			shoppingLists.push({brewer: brewer});
 			console.log('shopping lists: ', shoppingLists);
 			return res.json(shoppingLists); // return all shopping lists in JSON format
@@ -132,7 +132,7 @@ Router.post('/shopping-list/:recipeID', jwtAuth, (req, res) => {
 		console.log('user is now: ', _user);
 	});
 
-	shoppingList._brewer = _user.id;
+	shoppingList._brewer = _user[0].id;
 	shoppingList.save((err, shoppingList) => {
 		if (err) {
 			res.status(500).send('An error occurred');
