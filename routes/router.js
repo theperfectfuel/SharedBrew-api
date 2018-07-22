@@ -84,34 +84,38 @@ Router.post('/new-recipe', jwtAuth, (req, res) => {
 //======================================
 
 Router.get('/shopping-lists', jwtAuth, (req, res) => {
-	var _user;
+
 	User.find({username: req.user.username}, (err, foundUsers) => {
 		console.log('getting shopping lists for user: ', foundUsers[0]);
 		console.log('and _user.id is: ', foundUsers[0]._id);
 		console.log('and _user.username is: ', foundUsers[0].username);
-		_user = foundUsers[0];
-	});
-
-	// use mongoose to get user's shopping lists in the database
-	ShoppingList.find({_brewer: _user._id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
-		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
-		if (err) {
-		    return res.json(
-				{
-					"the error we found is: ": err,
-					"the user is: ": req.user
-				}
-			);
-		} else if (!shoppingLists) {
-			return res.json({"message: ": "no shopping lists for this user"});
-		} else {
-			console.log('inside ShoppingList.find else block _user.username is: ', _user.username);
-			var brewer;
-			brewer = _user.username;
-			shoppingLists.push({brewer: brewer});
-			console.log('shopping lists: ', shoppingLists);
-			return res.json(shoppingLists); // return all shopping lists in JSON format
-		}
+		return foundUsers[0];
+	})
+	.then(user => {
+		// use mongoose to get user's shopping lists in the database
+		ShoppingList.find({_brewer: user._id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
+			// if there is an error retrieving, send the error. nothing after res.send(err) will execute
+			if (err) {
+				return res.json(
+					{
+						"the error we found is: ": err,
+						"the user is: ": req.user
+					}
+				);
+			} else if (!shoppingLists) {
+				return res.json({"message: ": "no shopping lists for this user"});
+			} else {
+				console.log('inside ShoppingList.find then block user.username is: ', user.username);
+				var brewer;
+				brewer = user.username;
+				shoppingLists.push({brewer: brewer});
+				console.log('shopping lists: ', shoppingLists);
+				return res.json(shoppingLists); // return all shopping lists in JSON format
+			}
+		})
+	})
+	.catch(err => {
+		console.log('error getting shopping lists: ', err);
 	});
 });
 
