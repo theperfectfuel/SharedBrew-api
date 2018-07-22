@@ -130,8 +130,11 @@ Router.post('/shopping-list/:recipeID', jwtAuth, (req, res) => {
 	var shoppingList = new ShoppingList(req.body);
 
 	const _user = User.find({username: req.user.username}, (err, _user) => {
-		console.log('user is now: ', _user);
+		console.log('user is now: ', _user[0]);
 	});
+
+	console.log('i can find user outside of the find method: ', _user[0]);
+	console.log('i can find user id outside of the find method: ', _user[0]._id);
 
 	shoppingList._brewer = _user[0]._id;
 	shoppingList.save((err, shoppingList) => {
