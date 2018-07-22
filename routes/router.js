@@ -84,15 +84,16 @@ Router.post('/new-recipe', jwtAuth, (req, res) => {
 //======================================
 
 Router.get('/shopping-lists', jwtAuth, (req, res) => {
-
-	const _user = User.find({username: req.user.username}, (err, _user) => {
-		console.log('getting shopping lists for user: ', _user[0]);
-		console.log('and _user.id is: ', _user[0]._id);
-		console.log('and _user.username is: ', _user[0].username);
-
+	var _user;
+	const _user = User.find({username: req.user.username}, (err, foundUsers) => {
+		console.log('getting shopping lists for user: ', foundUsers[0]);
+		console.log('and _user.id is: ', foundUsers[0]._id);
+		console.log('and _user.username is: ', foundUsers[0].username);
+		_user = foundUsers[0];
 	});
+
 	// use mongoose to get user's shopping lists in the database
-	ShoppingList.find({_brewer: _user[0]._id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
+	ShoppingList.find({_brewer: _user._id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
 		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
 		if (err) {
 		    return res.json(
@@ -104,9 +105,9 @@ Router.get('/shopping-lists', jwtAuth, (req, res) => {
 		} else if (!shoppingLists) {
 			return res.json('no shopping lists for this user');
 		} else {
-			console.log('inside ShoppingList.find else block _user.username is: ', _user[0].username);
+			console.log('inside ShoppingList.find else block _user.username is: ', _user.username);
 			var brewer;
-			brewer = _user[0].username;
+			brewer = _user.username;
 			shoppingLists.push({brewer: brewer});
 			console.log('shopping lists: ', shoppingLists);
 			return res.json(shoppingLists); // return all shopping lists in JSON format
