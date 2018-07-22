@@ -92,6 +92,7 @@ Router.get('/shopping-lists', jwtAuth, (req, res) => {
 		return foundUsers[0];
 	})
 	.then(user => {
+		console.log('1: inside ShoppingList.find then block user.username is: ', user.username);
 		// use mongoose to get user's shopping lists in the database
 		ShoppingList.find({_brewer: user._id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
 			// if there is an error retrieving, send the error. nothing after res.send(err) will execute
@@ -105,7 +106,7 @@ Router.get('/shopping-lists', jwtAuth, (req, res) => {
 			} else if (!shoppingLists) {
 				return res.json({"message: ": "no shopping lists for this user"});
 			} else {
-				console.log('inside ShoppingList.find then block user.username is: ', user.username);
+				console.log('2: inside ShoppingList.find then block user.username is: ', user.username);
 				var brewer;
 				brewer = user.username;
 				shoppingLists.push({brewer: brewer});
