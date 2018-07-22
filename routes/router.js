@@ -87,17 +87,19 @@ Router.get('/shopping-lists', jwtAuth, (req, res) => {
 
 	const _user = User.find({username: req.user.username}, (err, _user) => {
 		console.log('getting shopping lists for user: ', _user);
-		console.log('and _user.id is: ', _user.id);
+		console.log('and _user.id is: ', _user._id);
+		console.log('and _user.username is: ', _user.username);
+
 	});
 	// use mongoose to get user's shopping lists in the database
-	ShoppingList.find({_brewer: _user.id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
-		console.log('inside ShoppingList.find _user.id is: ', _user.id);
+	ShoppingList.find({_brewer: _user._id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
+		console.log('inside ShoppingList.find _user.id is: ', _user._id);
 		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
 		if (err) {
 		    return res.json(
 				{
 					"the error we found is: ": err,
-					"the user is: ": req.user.id
+					"the user is: ": req.user
 				}
 			);
 		} else {
