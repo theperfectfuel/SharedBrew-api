@@ -93,7 +93,6 @@ Router.get('/shopping-lists', jwtAuth, (req, res) => {
 	});
 	// use mongoose to get user's shopping lists in the database
 	ShoppingList.find({_brewer: _user[0]._id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
-		console.log('inside ShoppingList.find _user.id is: ', _user[0]._id);
 		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
 		if (err) {
 		    return res.json(
