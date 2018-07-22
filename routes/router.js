@@ -103,7 +103,7 @@ Router.get('/shopping-lists', jwtAuth, (req, res) => {
 				}
 			);
 		} else if (!shoppingLists) {
-			return res.json('no shopping lists for this user');
+			return res.json({"message: ": "no shopping lists for this user"});
 		} else {
 			console.log('inside ShoppingList.find else block _user.username is: ', _user.username);
 			var brewer;
