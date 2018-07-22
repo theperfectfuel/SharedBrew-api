@@ -85,7 +85,7 @@ Router.post('/new-recipe', jwtAuth, (req, res) => {
 
 Router.get('/shopping-lists', jwtAuth, (req, res) => {
 	var _user;
-	const _user = User.find({username: req.user.username}, (err, foundUsers) => {
+	User.find({username: req.user.username}, (err, foundUsers) => {
 		console.log('getting shopping lists for user: ', foundUsers[0]);
 		console.log('and _user.id is: ', foundUsers[0]._id);
 		console.log('and _user.username is: ', foundUsers[0].username);
