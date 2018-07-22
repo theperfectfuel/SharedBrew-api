@@ -91,6 +91,7 @@ Router.get('/shopping-lists', jwtAuth, (req, res) => {
 		console.log('and _user.username is: ', foundUsers[0].username);
 		return foundUsers[0];
 	})
+	.exec()
 	.then(user => {
 		console.log('1: inside ShoppingList.find then block user.username is: ', user.username);
 		// use mongoose to get user's shopping lists in the database
