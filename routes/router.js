@@ -85,14 +85,10 @@ Router.post('/new-recipe', jwtAuth, (req, res) => {
 
 Router.get('/shopping-lists', jwtAuth, (req, res) => {
 
-	User.find({username: req.user.username}, (err, foundUsers) => {
-		console.log('getting shopping lists for user: ', foundUsers[0]);
-		console.log('and _user.id is: ', foundUsers[0]._id);
-		console.log('and _user.username is: ', foundUsers[0].username);
-		return foundUsers[0];
-	})
+	User.find({username: req.user.username})
 	.exec()
-	.then(user => {
+	.then(users => {
+		const user = users[0];
 		console.log('1: inside ShoppingList.find then block user.username is: ', user.username);
 		// use mongoose to get user's shopping lists in the database
 		ShoppingList.find({_brewer: user._id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
