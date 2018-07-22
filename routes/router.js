@@ -101,6 +101,8 @@ Router.get('/shopping-lists', jwtAuth, (req, res) => {
 					"the user is: ": req.user
 				}
 			);
+		} else if (!shoppingLists) {
+			return res.json('no shopping lists for this user');
 		} else {
 			console.log('inside ShoppingList.find else block _user.username is: ', _user[0].username);
 			var brewer;
