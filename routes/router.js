@@ -86,9 +86,9 @@ Router.post('/new-recipe', jwtAuth, (req, res) => {
 Router.get('/shopping-lists', jwtAuth, (req, res) => {
 
 	const _user = User.find({username: req.user.username}, (err, _user) => {
-		console.log('getting shopping lists for user: ', _user);
-		console.log('and _user.id is: ', _user._id);
-		console.log('and _user.username is: ', _user.username);
+		console.log('getting shopping lists for user: ', _user[0]);
+		console.log('and _user.id is: ', _user[0]._id);
+		console.log('and _user.username is: ', _user[0].username);
 
 	});
 	// use mongoose to get user's shopping lists in the database
