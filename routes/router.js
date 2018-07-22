@@ -133,7 +133,7 @@ Router.post('/shopping-list/:recipeID', jwtAuth, (req, res) => {
 		console.log('user is now: ', _user);
 	});
 
-	shoppingList._brewer = _user[0].id;
+	shoppingList._brewer = _user[0]._id;
 	shoppingList.save((err, shoppingList) => {
 		if (err) {
 			res.status(500).send('An error occurred');
