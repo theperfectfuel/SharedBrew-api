@@ -87,9 +87,11 @@ Router.get('/shopping-lists', jwtAuth, (req, res) => {
 
 	const _user = User.find({username: req.user.username}, (err, _user) => {
 		console.log('getting shopping lists for user: ', _user);
+		console.log('and _user.id is: ', _user.id);
 	});
 	// use mongoose to get user's shopping lists in the database
 	ShoppingList.find({_brewer: _user.id}, null, {sort: {createdDate: -1}}, (err, shoppingLists) => {
+		console.log('inside ShoppingList.find _user.id is: ', _user.id);
 		// if there is an error retrieving, send the error. nothing after res.send(err) will execute
 		if (err) {
 		    return res.json(
@@ -99,6 +101,7 @@ Router.get('/shopping-lists', jwtAuth, (req, res) => {
 				}
 			);
 		} else {
+			console.log('inside ShoppingList.find else block _user.username is: ', _user.username);
 			var brewer;
 			brewer = _user.username;
 			shoppingLists.push({brewer: brewer});
