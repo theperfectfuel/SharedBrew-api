@@ -128,15 +128,31 @@ Router.get('/shopping-list/:shoppingListID', jwtAuth, checkLoggedIn, (req, res) 
 
 Router.post('/shopping-list/:recipeID', jwtAuth, (req, res) => {
 	var shoppingList = new ShoppingList(req.body);
-
-	const _user = User.find({username: req.user.username}, (err, _user) => {
-		console.log('user is now: ', _user[0]);
+	var _user;
+	// const _user = User.find({username: req.user.username}, (err, _user) => {
+	// 	console.log('user is now: ', _user[0]);
+	// });
+	function retrieveUser(uname, callback) {
+		User.find({uname: uname}, function(err, users) {
+			if (err) {
+			callback(err, null);
+			} else {
+			callback(null, users[0]);
+			}
+		});
+	};
+		
+	retrieveUser(req.user.username, function(err, user) {
+		if (err) {
+			console.log(err);
+		}
+		_user = user;
 	});
 
-	console.log('i can find user outside of the find method: ', _user[0]);
-	console.log('i can find user id outside of the find method: ', _user[0]._id);
+	console.log('i can find user outside of the find method: ', _user);
+	console.log('i can find user id outside of the find method: ', _user._id);
 
-	shoppingList._brewer = _user[0]._id;
+	shoppingList._brewer = _user._id;
 	shoppingList.save((err, shoppingList) => {
 		if (err) {
 			res.status(500).send('An error occurred');
