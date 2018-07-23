@@ -1,5 +1,6 @@
 var express = require('express');
 var Router = express.Router();
+var mongoose = require('mongoose');
 var path = require('path');
 var checkLoggedIn = require('../middleware/checkLoggedIn');
 var Recipe = require('../models/Recipe');
@@ -8,6 +9,8 @@ var User = require('../models/User');
 
 var passport = require('passport');
 const jwtAuth = passport.authenticate('jwt', {session: false});
+
+var ObjectId = mongoose.Types.ObjectId;
 
 //======================================
 // API RESOURCE ROUTES
@@ -130,7 +133,16 @@ Router.get('/shopping-list/:shoppingListID', jwtAuth, checkLoggedIn, (req, res) 
 });
 
 Router.post('/shopping-list/:recipeID', jwtAuth, (req, res) => {
-	var shoppingList = new ShoppingList(req.body);
+
+	var shoppingList = new ShoppingList({
+		beer_name: req.body.beer_name, 
+		grains_list: req.body.grains_list, 
+		hops_list: req.body.hops_list, 
+		yeast_list: req.body.yeast_list, 
+		other_list: req.body.other_list,
+		batch_size: req.body.batch_size, 
+		_id: new ObjectId()
+	});
 
 	User.find({username: req.user.username})
 	.exec()
@@ -149,6 +161,19 @@ Router.post('/shopping-list/:recipeID', jwtAuth, (req, res) => {
 	})
 	.catch(err => {
 		console.log('error saving shopping list: ', err);
+	})
+});
+
+Router.delete('/shopping-list/:shoppingListID', jwtAuth, (req, res) => {
+
+	ShoppingList.findByIdAndRemove(req.params.shoppingListID)
+	.then(() => {
+		return res.json({
+			"message": "shopping list successfully removed"
+		});
+	})
+	.catch(err => {
+		console.log('error removing shopping list: ', err);
 	})
 });
 
